@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ReviewLinkHub.Api.Models;
 namespace ReviewLinkHub.Api.Data;
+
 
 public class AppDbContext : DbContext
 {
@@ -8,5 +10,5 @@ public class AppDbContext : DbContext
 
 
     }
-  
+   public  DbSet<Business> Businesses { get; set; }
 }
