@@ -1,0 +1,14 @@
+﻿services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: review_link_hub
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: local_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
