@@ -13,4 +13,7 @@ public class AppDbContext : DbContext
     }
     public DbSet<ReviewRequest> ReviewRequests { get; set; }
     public  DbSet<Business> Businesses { get; set; }
+    
+    public DbSet<EmailDelivery> EmailDeliveries { get; set; }
+
 }

@@ -51,6 +51,35 @@ namespace ReviewLinkHub.Api.Migrations
                     b.ToTable("Businesses");
                 });
 
+            modelBuilder.Entity("ReviewLinkHub.Api.Models.EmailDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AttemptedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ReviewRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewRequestId");
+
+                    b.ToTable("EmailDeliveries");
+                });
+
             modelBuilder.Entity("ReviewLinkHub.Api.Models.ReviewRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -93,6 +122,17 @@ namespace ReviewLinkHub.Api.Migrations
                     b.HasIndex("BusinessId");
 
                     b.ToTable("ReviewRequests");
+                });
+
+            modelBuilder.Entity("ReviewLinkHub.Api.Models.EmailDelivery", b =>
+                {
+                    b.HasOne("ReviewLinkHub.Api.Models.ReviewRequest", "ReviewRequest")
+                        .WithMany()
+                        .HasForeignKey("ReviewRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReviewRequest");
                 });
 
             modelBuilder.Entity("ReviewLinkHub.Api.Models.ReviewRequest", b =>
