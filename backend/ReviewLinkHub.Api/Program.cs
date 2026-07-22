@@ -1,8 +1,9 @@
+
 using Microsoft.EntityFrameworkCore;
 using ReviewLinkHub.Api.Data;
 using ReviewLinkHub.Api.Options;
 using ReviewLinkHub.Api.Services;
-
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,11 +21,17 @@ builder.Services.Configure<GooglePlacesOptions>(
 builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
 builder.Services.AddScoped<IReviewLinkService, ReviewLinkService>();
+
 builder.Services.AddScoped<IQrCodeService, QrCodeService>();
 
 builder.Services.Configure<EmailOptions>(
     builder.Configuration.GetSection("Email"));
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddScoped<IReportService, ReportService>();
+
+
+
 var app = builder.Build();   
 
 // Configure the HTTP request pipeline.
