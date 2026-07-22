@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ReviewLinkHub.Api.Data;
 using ReviewLinkHub.Api.DTOs;
 using ReviewLinkHub.Api.Models;
+using ReviewLinkHub.Api.Services;
+
 
 namespace ReviewLinkHub.Api.Controllers;
 
@@ -11,11 +13,14 @@ namespace ReviewLinkHub.Api.Controllers;
 public class ReviewRequestsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IQrCodeService _qrCodeService;
 
-    public ReviewRequestsController(AppDbContext context)
+    public ReviewRequestsController(AppDbContext context, IQrCodeService qrCodeService)
     {
         _context = context;
+        _qrCodeService = qrCodeService;
     }
+    
 
     [HttpPost]
     public async Task<ActionResult<ReviewRequestResponseDto>> Create(CreateReviewRequestDto dto)
@@ -138,4 +143,18 @@ public class ReviewRequestsController : ControllerBase
             PageSize = pageSize
         };
     }
+    [HttpGet("{id}/qr-code")]
+    public async Task<IActionResult> GetQrCode(Guid id)
+    {
+        var reviewRequest = await _context.ReviewRequests.FindAsync(id);
+
+        if (reviewRequest == null)
+        {
+            return NotFound();
+        }
+
+        var qrBytes = _qrCodeService.GeneratePng(reviewRequest.ReviewUrl);
+        return File(qrBytes, "image/png", $"review-qr-{id}.png");
+    }
+
 }

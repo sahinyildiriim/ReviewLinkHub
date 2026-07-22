@@ -19,6 +19,8 @@ builder.Services.Configure<GooglePlacesOptions>(
 
 builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
+builder.Services.AddScoped<IReviewLinkService, ReviewLinkService>();
+builder.Services.AddScoped<IQrCodeService, QrCodeService>();
 var app = builder.Build();   
 
 // Configure the HTTP request pipeline.
