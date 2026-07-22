@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BusinessSearch } from '@/components/business/BusinessSearch'
 import { NewRequestForm } from '@/components/business/NewRequestForm'
+import { RequestResult } from '@/components/business/RequestResult'
 import type { BusinessSearchResult, ReviewRequest } from '@/types'
 
 export function HomePage() {
@@ -23,10 +24,13 @@ export function HomePage() {
       </div>
 
       {createdRequest ? (
-        <p className="text-sm text-muted-foreground">
-          Talep #{createdRequest.id} oluşturuldu — sonuç ekranı bir sonraki
-          adımda eklenecek.
-        </p>
+        <RequestResult
+          request={createdRequest}
+          onCreateAnother={() => {
+            setCreatedRequest(null)
+            setSelectedBusiness(null)
+          }}
+        />
       ) : selectedBusiness ? (
         <NewRequestForm
           business={selectedBusiness}

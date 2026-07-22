@@ -34,3 +34,17 @@ export async function listReviewRequests(params: ReviewRequestListParams) {
 export function getQrCodeUrl(id: string) {
   return `${apiClient.defaults.baseURL}/api/review-requests/${id}/qr-code`
 }
+
+export async function downloadQrCode(id: string, businessName: string) {
+  const { data } = await apiClient.get<Blob>(
+    `/api/review-requests/${id}/qr-code`,
+    { responseType: 'blob' },
+  )
+
+  const url = URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${businessName}-review-qr.png`
+  link.click()
+  URL.revokeObjectURL(url)
+}
