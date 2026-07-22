@@ -14,35 +14,51 @@ public class ReviewRequestsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IQrCodeService _qrCodeService;
+    private readonly IReviewLinkService _reviewLinkService;
 
-    public ReviewRequestsController(AppDbContext context, IQrCodeService qrCodeService)
+    public ReviewRequestsController(
+        AppDbContext context,
+        IQrCodeService qrCodeService,
+        IReviewLinkService reviewLinkService)
     {
         _context = context;
         _qrCodeService = qrCodeService;
+        _reviewLinkService = reviewLinkService;
     }
-    
+
 
     [HttpPost]
     public async Task<ActionResult<ReviewRequestResponseDto>> Create(CreateReviewRequestDto dto)
     {
-        // 1. Business zaten var mı kontrol et (aynı isim+adres), yoksa oluştur
+        // 1. Business zaten var mı kontrol et (artık GooglePlaceId üzerinden — gerçek unique key)
         var business = await _context.Businesses
-            .FirstOrDefaultAsync(b => b.Name == dto.BusinessName && b.FormattedAddress == dto.BusinessAddress);
+            .FirstOrDefaultAsync(b => b.GooglePlaceId == dto.PlaceId);
 
         if (business == null)
         {
             business = new Business
             {
                 Id = Guid.NewGuid(),
-                GooglePlaceId = $"FAKE-{Guid.NewGuid()}", // Google entegrasyonu gelene kadar sahte
+                GooglePlaceId = dto.PlaceId,
                 Name = dto.BusinessName,
                 FormattedAddress = dto.BusinessAddress,
+                GoogleMapsUrl = dto.GoogleMapsUrl,
                 CreatedAtUtc = DateTime.UtcNow
             };
             _context.Businesses.Add(business);
         }
+        else
+        {
+            // Zaten vardı — güncel bilgilerle tazele
+            business.Name = dto.BusinessName;
+            business.FormattedAddress = dto.BusinessAddress;
+            business.GoogleMapsUrl = dto.GoogleMapsUrl;
+        }
 
-        // 2. ReviewRequest oluştur
+        // 2. Review linkini artık ReviewLinkService ile üret
+        var reviewUrl = _reviewLinkService.Create(business.GooglePlaceId);
+
+        // 3. ReviewRequest oluştur
         var reviewRequest = new ReviewRequest
         {
             Id = Guid.NewGuid(),
@@ -50,17 +66,14 @@ public class ReviewRequestsController : ControllerBase
             Business = business,
             RecipientName = dto.RecipientName,
             RecipientEmail = dto.RecipientEmail,
-            ReviewUrl = $"https://search.google.com/local/writereview?placeid={business.GooglePlaceId}",
+            ReviewUrl = reviewUrl,
             Status = "Pending",
             CreatedAtUtc = DateTime.UtcNow
         };
 
         _context.ReviewRequests.Add(reviewRequest);
-
-        // 3. Veritabanına yaz
         await _context.SaveChangesAsync();
 
-        // 4. Response DTO'ya çevirip döndür
         var response = new ReviewRequestResponseDto
         {
             Id = reviewRequest.Id,
