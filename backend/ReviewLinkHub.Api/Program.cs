@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ReviewLinkHub.Api.Data;
+using ReviewLinkHub.Api.Options;
+using ReviewLinkHub.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +14,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<GooglePlacesOptions>(
+    builder.Configuration.GetSection("GooglePlaces"));
 
-var app = builder.Build();   // ← BU SATIR EKSİKTİ
+builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
+
+var app = builder.Build();   
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
