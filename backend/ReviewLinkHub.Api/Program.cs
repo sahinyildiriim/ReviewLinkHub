@@ -21,6 +21,10 @@ builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
 builder.Services.AddScoped<IReviewLinkService, ReviewLinkService>();
 builder.Services.AddScoped<IQrCodeService, QrCodeService>();
+
+builder.Services.Configure<EmailOptions>(
+    builder.Configuration.GetSection("Email"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();   
 
 // Configure the HTTP request pipeline.

@@ -15,15 +15,18 @@ public class ReviewRequestsController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IQrCodeService _qrCodeService;
     private readonly IReviewLinkService _reviewLinkService;
+    private readonly IEmailService _emailService;
 
     public ReviewRequestsController(
         AppDbContext context,
         IQrCodeService qrCodeService,
-        IReviewLinkService reviewLinkService)
+        IReviewLinkService reviewLinkService,
+        IEmailService emailService)
     {
         _context = context;
         _qrCodeService = qrCodeService;
         _reviewLinkService = reviewLinkService;
+        _emailService = emailService;
     }
 
 
@@ -53,6 +56,7 @@ public class ReviewRequestsController : ControllerBase
             business.Name = dto.BusinessName;
             business.FormattedAddress = dto.BusinessAddress;
             business.GoogleMapsUrl = dto.GoogleMapsUrl;
+
         }
 
         // 2. Review linkini artık ReviewLinkService ile üret
@@ -72,6 +76,28 @@ public class ReviewRequestsController : ControllerBase
         };
 
         _context.ReviewRequests.Add(reviewRequest);
+        await _context.SaveChangesAsync();
+        try
+        {
+            var qrBytes = _qrCodeService.GeneratePng(reviewRequest.ReviewUrl);
+
+            await _emailService.SendReviewQrEmailAsync(
+                reviewRequest.RecipientName,
+                reviewRequest.RecipientEmail,
+                business.Name,
+                reviewRequest.ReviewUrl,
+                qrBytes,
+                cancellationToken: default);
+
+            reviewRequest.Status = "Sent";
+            reviewRequest.SentAtUtc = DateTime.UtcNow;
+        }
+        catch (Exception ex)
+        {
+            reviewRequest.Status = "Failed";
+            reviewRequest.LastErrorMessage = ex.Message;
+        }
+
         await _context.SaveChangesAsync();
 
         var response = new ReviewRequestResponseDto
