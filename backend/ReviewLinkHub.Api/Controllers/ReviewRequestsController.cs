@@ -88,5 +88,54 @@ public class ReviewRequestsController : ControllerBase
             Status = reviewRequest.Status,
             CreatedAtUtc = reviewRequest.CreatedAtUtc
         };
+
+       
+    }
+    [HttpGet]
+    public async Task<ActionResult<PagedResultDto<ReviewRequestResponseDto>>> GetAll(
+    [FromQuery] string? search,
+    [FromQuery] string? status,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20)
+    {
+        var query = _context.ReviewRequests
+            .Include(r => r.Business)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(r =>
+                r.Business.Name.Contains(search) ||
+                r.RecipientEmail.Contains(search));
+        }
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            query = query.Where(r => r.Status == status);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(r => r.CreatedAtUtc)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => new ReviewRequestResponseDto
+            {
+                Id = r.Id,
+                BusinessName = r.Business.Name,
+                ReviewUrl = r.ReviewUrl,
+                Status = r.Status,
+                CreatedAtUtc = r.CreatedAtUtc
+            })
+            .ToListAsync();
+
+        return new PagedResultDto<ReviewRequestResponseDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 }
