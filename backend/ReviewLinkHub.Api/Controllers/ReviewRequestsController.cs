@@ -223,7 +223,7 @@ public class ReviewRequestsController : ControllerBase
     [FromQuery] string? search,
     [FromQuery] string? status,
     [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 20)
+    [FromQuery] int pageSize = 10)
     {
         var query = _context.ReviewRequests
             .Include(r => r.Business)
@@ -279,4 +279,4 @@ public class ReviewRequestsController : ControllerBase
         return File(qrBytes, "image/png", $"review-qr-{id}.png");
     }
 
-}
+}   

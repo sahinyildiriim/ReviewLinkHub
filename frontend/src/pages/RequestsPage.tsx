@@ -30,7 +30,7 @@ import { SummaryStats } from '@/components/business/SummaryStats'
 import { TrendChart } from '@/components/business/TrendChart'
 import type { ReviewRequestStatus } from '@/types'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 const ALL_STATUSES = 'all'
 
 export function RequestsPage() {

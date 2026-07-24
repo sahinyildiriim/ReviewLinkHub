@@ -19,12 +19,12 @@ export function HomePage() {
   const step = createdRequest ? 3 : selectedBusiness ? 2 : 1
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 py-12">
+    <div className="flex w-full flex-col items-center gap-6 pt-2 pb-12">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2"
+        className="mx-auto grid w-full max-w-5xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.2fr_1fr]"
       >
         <div className="flex flex-col items-center gap-3 text-center lg:items-start lg:text-left">
           <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">

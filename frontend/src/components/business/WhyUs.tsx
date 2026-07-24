@@ -23,7 +23,7 @@ const items = [
 
 export function WhyUs() {
   return (
-    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-3">
       {items.map(({ icon: Icon, title, description }) => (
         <div
           key={title}

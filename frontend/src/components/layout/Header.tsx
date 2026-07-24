@@ -11,8 +11,12 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <NavLink to="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-            R
+          <span className="h-9 w-9 overflow-hidden rounded-md">
+            <img
+              src="/logo.png"
+              alt="ReviewLinkHub logo"
+              className="h-full w-full scale-[2.2] object-cover object-[50%_42%]"
+            />
           </span>
           <span className="text-base font-medium tracking-tight">
             ReviewLinkHub

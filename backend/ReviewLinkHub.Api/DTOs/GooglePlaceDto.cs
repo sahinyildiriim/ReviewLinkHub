@@ -4,6 +4,7 @@
 public class GoogleTextSearchRequest
 {
     public string TextQuery { get; set; } = string.Empty;
+    public int MaxResultCount { get; set; } = 5;
 }
 
 // Google'ın döndürdüğü tek bir işletme kaydı

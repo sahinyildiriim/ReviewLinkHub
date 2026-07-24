@@ -20,7 +20,11 @@ public class GooglePlacesService : IGooglePlacesService
 
     public async Task<List<BusinessSearchResultDto>> SearchAsync(string query, CancellationToken cancellationToken)
     {
-        var requestBody = new GoogleTextSearchRequest { TextQuery = query };
+        var requestBody = new GoogleTextSearchRequest
+        {
+            TextQuery = query,
+            MaxResultCount = 5
+        };
         var json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
