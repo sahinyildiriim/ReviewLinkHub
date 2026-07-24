@@ -7,6 +7,12 @@ namespace ReviewLinkHub.Api.Services;
 
 public class ReportService : IReportService
 {
+    private static readonly TimeZoneInfo TurkeyTimeZone =
+        TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+
+    private static string FormatLocal(DateTime utc) =>
+        TimeZoneInfo.ConvertTimeFromUtc(utc, TurkeyTimeZone).ToString("yyyy-MM-dd HH:mm");
+
     public byte[] GenerateExcel(List<ReviewRequest> reviewRequests)
     {
         using var workbook = new XLWorkbook();
@@ -32,7 +38,7 @@ public class ReportService : IReportService
             worksheet.Cell(row, 2).Value = r.Business.Name;
             worksheet.Cell(row, 3).Value = r.RecipientEmail;
             worksheet.Cell(row, 4).Value = r.Status;
-            worksheet.Cell(row, 5).Value = r.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm");
+            worksheet.Cell(row, 5).Value = FormatLocal(r.CreatedAtUtc);
             worksheet.Cell(row, 6).Value = r.LastErrorMessage ?? "";
         }
 
@@ -81,18 +87,21 @@ public class ReportService : IReportService
 
                         table.Header(header =>
                         {
-                            header.Cell().Text("İşletme").Bold();
-                            header.Cell().Text("E-posta").Bold();
-                            header.Cell().Text("Durum").Bold();
-                            header.Cell().Text("Tarih").Bold();
+                            header.Cell().Background(Colors.Grey.Lighten2).Padding(6).Text("İşletme").Bold();
+                            header.Cell().Background(Colors.Grey.Lighten2).Padding(6).Text("E-posta").Bold();
+                            header.Cell().Background(Colors.Grey.Lighten2).Padding(6).Text("Durum").Bold();
+                            header.Cell().Background(Colors.Grey.Lighten2).Padding(6).Text("Tarih").Bold();
                         });
 
-                        foreach (var r in reviewRequests)
+                        for (int i = 0; i < reviewRequests.Count; i++)
                         {
-                            table.Cell().Text(r.Business.Name);
-                            table.Cell().Text(r.RecipientEmail);
-                            table.Cell().Text(r.Status);
-                            table.Cell().Text(r.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm"));
+                            var r = reviewRequests[i];
+                            var backgroundColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten3;
+
+                            table.Cell().Background(backgroundColor).Padding(6).BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Text(r.Business.Name);
+                            table.Cell().Background(backgroundColor).Padding(6).BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Text(r.RecipientEmail);
+                            table.Cell().Background(backgroundColor).Padding(6).BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Text(r.Status);
+                            table.Cell().Background(backgroundColor).Padding(6).BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten1).Text(FormatLocal(r.CreatedAtUtc));
                         }
                     });
                 });
