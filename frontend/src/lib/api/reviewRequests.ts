@@ -16,6 +16,13 @@ export async function createReviewRequest(
   return data
 }
 
+export async function resendReviewRequest(id: string) {
+  const { data } = await apiClient.post<ReviewRequest>(
+    `/api/review-requests/${id}/resend`,
+  )
+  return data
+}
+
 export async function getReviewRequest(id: string) {
   const { data } = await apiClient.get<ReviewRequest>(
     `/api/review-requests/${id}`,

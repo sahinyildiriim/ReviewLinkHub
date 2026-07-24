@@ -1,16 +1,34 @@
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, RotateCw } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { QrCodePanel } from '@/components/business/QrCodePanel'
-import { useReviewRequest } from '@/queries/useReviewRequests'
+import { useResendReviewRequest, useReviewRequest } from '@/queries/useReviewRequests'
 import { statusBadgeVariant, statusLabels } from '@/lib/status'
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: request, isLoading, isError } = useReviewRequest(id)
+  const { mutate: resend, isPending: isResending } = useResendReviewRequest()
+
+  function handleResend() {
+    if (!id) return
+    resend(id, {
+      onSuccess: (data) => {
+        if (data.status === 'Sent') {
+          toast.success('E-posta tekrar gönderildi.')
+        } else {
+          toast.error('Yeniden gönderim yine başarısız oldu.')
+        }
+      },
+      onError: () => {
+        toast.error('Yeniden gönderilemedi. Lütfen tekrar deneyin.')
+      },
+    })
+  }
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
@@ -46,6 +64,18 @@ export function RequestDetailPage() {
               {new Date(request.createdAtUtc).toLocaleString('tr-TR')}
             </p>
           </div>
+
+          {request.status === 'Failed' && (
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={isResending}
+              onClick={handleResend}
+            >
+              <RotateCw className="h-4 w-4" />
+              {isResending ? 'Gönderiliyor…' : 'Yeniden Gönder'}
+            </Button>
+          )}
 
           <QrCodePanel
             requestId={request.id}

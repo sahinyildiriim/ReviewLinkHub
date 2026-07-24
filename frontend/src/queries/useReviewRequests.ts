@@ -3,6 +3,7 @@ import {
   createReviewRequest,
   getReviewRequest,
   listReviewRequests,
+  resendReviewRequest,
 } from '@/lib/api/reviewRequests'
 import type { CreateReviewRequestPayload, ReviewRequestListParams } from '@/types'
 
@@ -27,6 +28,16 @@ export function useCreateReviewRequest() {
   return useMutation({
     mutationFn: (payload: CreateReviewRequestPayload) =>
       createReviewRequest(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['review-requests'] })
+    },
+  })
+}
+
+export function useResendReviewRequest() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => resendReviewRequest(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-requests'] })
     },
