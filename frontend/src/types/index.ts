@@ -37,3 +37,18 @@ export interface ReviewRequestListParams {
   page?: number
   pageSize?: number
 }
+
+export interface DailyTrendPoint {
+  date: string
+  sentCount: number
+  failedCount: number
+}
+
+export interface ReviewRequestsSummary {
+  totalRequests: number
+  sentCount: number
+  failedCount: number
+  pendingCount: number
+  successRate: number
+  dailyTrend: DailyTrendPoint[]
+}

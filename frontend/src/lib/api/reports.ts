@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api-client'
-import type { ReviewRequestStatus } from '@/types'
+import type { ReviewRequestsSummary, ReviewRequestStatus } from '@/types'
 
 interface ReportFilters {
   search?: string
@@ -38,4 +38,11 @@ export function downloadPdfReport(filters: ReportFilters) {
     filters,
     'review-requests.pdf',
   )
+}
+
+export async function getReviewRequestsSummary() {
+  const { data } = await apiClient.get<ReviewRequestsSummary>(
+    '/api/reports/review-requests/summary',
+  )
+  return data
 }

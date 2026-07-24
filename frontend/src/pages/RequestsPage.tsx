@@ -22,9 +22,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useReviewRequestsList } from '@/queries/useReviewRequests'
+import { useReportsSummary } from '@/queries/useReportsSummary'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { downloadExcelReport, downloadPdfReport } from '@/lib/api/reports'
 import { statusBadgeVariant, statusLabels } from '@/lib/status'
+import { SummaryStats } from '@/components/business/SummaryStats'
+import { TrendChart } from '@/components/business/TrendChart'
 import type { ReviewRequestStatus } from '@/types'
 
 const PAGE_SIZE = 20
@@ -46,6 +49,8 @@ export function RequestsPage() {
     page,
     pageSize: PAGE_SIZE,
   })
+
+  const { data: summary, isLoading: isSummaryLoading } = useReportsSummary()
 
   const totalPages = data ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1
 
@@ -109,6 +114,10 @@ export function RequestsPage() {
           </Button>
         </div>
       </div>
+
+      <SummaryStats summary={summary} isLoading={isSummaryLoading} />
+
+      <TrendChart data={summary?.dailyTrend} isLoading={isSummaryLoading} />
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">

@@ -71,9 +71,10 @@ public class ReportsController : ControllerBase
         var failedCount = allRequests.Count(r => r.Status == "Failed");
         var pendingCount = allRequests.Count(r => r.Status == "Pending");
         var successRate = totalRequests > 0 ? (sentCount * 100.0 / totalRequests) : 0;
+        var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
 
         var dailyTrend = allRequests
-            .GroupBy(r => DateOnly.FromDateTime(r.CreatedAtUtc))
+            .GroupBy(r => DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(r.CreatedAtUtc, turkeyTimeZone)))
             .OrderBy(g => g.Key)
             .Select(g => new DailyTrendPointDto
             {
