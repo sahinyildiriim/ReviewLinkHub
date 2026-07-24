@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReviewLinkHub.Api.Data;
+using ReviewLinkHub.Api.DTOs;
 using ReviewLinkHub.Api.Services;
 
 namespace ReviewLinkHub.Api.Controllers;
@@ -60,4 +61,38 @@ public class ReportsController : ControllerBase
 
         return await query.OrderByDescending(r => r.CreatedAtUtc).ToListAsync();
     }
+    [HttpGet("summary")]
+    public async Task<ActionResult<DashboardSummaryDto>> GetSummary()
+    {
+        var allRequests = await _context.ReviewRequests.ToListAsync();
+
+        var totalRequests = allRequests.Count;
+        var sentCount = allRequests.Count(r => r.Status == "Sent");
+        var failedCount = allRequests.Count(r => r.Status == "Failed");
+        var pendingCount = allRequests.Count(r => r.Status == "Pending");
+        var successRate = totalRequests > 0 ? (sentCount * 100.0 / totalRequests) : 0;
+
+        var dailyTrend = allRequests
+            .GroupBy(r => DateOnly.FromDateTime(r.CreatedAtUtc))
+            .OrderBy(g => g.Key)
+            .Select(g => new DailyTrendPointDto
+            {
+                Date = g.Key,
+                SentCount = g.Count(r => r.Status == "Sent"),
+                FailedCount = g.Count(r => r.Status == "Failed")
+            })
+            .ToList();
+
+        return new DashboardSummaryDto
+        {
+            TotalRequests = totalRequests,
+            SentCount = sentCount,
+            FailedCount = failedCount,
+            PendingCount = pendingCount,
+            SuccessRate = successRate,
+            DailyTrend = dailyTrend
+        };
+    }
+
+
 }
