@@ -91,14 +91,33 @@ public class ReviewRequestsController : ControllerBase
 
             reviewRequest.Status = "Sent";
             reviewRequest.SentAtUtc = DateTime.UtcNow;
+
+            _context.EmailDeliveries.Add(new EmailDelivery
+            {
+                Id = Guid.NewGuid(),
+                ReviewRequestId = reviewRequest.Id,
+                Status = "Sent",
+                AttemptedAtUtc = DateTime.UtcNow
+            });
         }
         catch (Exception ex)
         {
             reviewRequest.Status = "Failed";
             reviewRequest.LastErrorMessage = ex.Message;
+
+            _context.EmailDeliveries.Add(new EmailDelivery
+            {
+                Id = Guid.NewGuid(),
+                ReviewRequestId = reviewRequest.Id,
+                Status = "Failed",
+                AttemptedAtUtc = DateTime.UtcNow,
+                ErrorMessage = ex.Message
+            });
         }
 
         await _context.SaveChangesAsync();
+
+
 
         var response = new ReviewRequestResponseDto
         {
@@ -110,6 +129,70 @@ public class ReviewRequestsController : ControllerBase
         };
 
         return CreatedAtAction(nameof(GetById), new { id = reviewRequest.Id }, response);
+    }
+
+    [HttpPost("{id}/resend")]
+    public async Task<ActionResult<ReviewRequestResponseDto>> Resend(Guid id, CancellationToken cancellationToken)
+    {
+        var reviewRequest = await _context.ReviewRequests
+            .Include(r => r.Business)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+
+        if (reviewRequest == null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var qrBytes = _qrCodeService.GeneratePng(reviewRequest.ReviewUrl);
+
+            await _emailService.SendReviewQrEmailAsync(
+                reviewRequest.RecipientName,
+                reviewRequest.RecipientEmail,
+                reviewRequest.Business.Name,
+                reviewRequest.ReviewUrl,
+                qrBytes,
+                cancellationToken);
+
+            reviewRequest.Status = "Sent";
+            reviewRequest.SentAtUtc = DateTime.UtcNow;
+            reviewRequest.RetryCount += 1;
+
+            _context.EmailDeliveries.Add(new EmailDelivery
+            {
+                Id = Guid.NewGuid(),
+                ReviewRequestId = reviewRequest.Id,
+                Status = "Sent",
+                AttemptedAtUtc = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            reviewRequest.Status = "Failed";
+            reviewRequest.LastErrorMessage = ex.Message;
+            reviewRequest.RetryCount += 1;
+
+            _context.EmailDeliveries.Add(new EmailDelivery
+            {
+                Id = Guid.NewGuid(),
+                ReviewRequestId = reviewRequest.Id,
+                Status = "Failed",
+                AttemptedAtUtc = DateTime.UtcNow,
+                ErrorMessage = ex.Message
+            });
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new ReviewRequestResponseDto
+        {
+            Id = reviewRequest.Id,
+            BusinessName = reviewRequest.Business.Name,
+            ReviewUrl = reviewRequest.ReviewUrl,
+            Status = reviewRequest.Status,
+            CreatedAtUtc = reviewRequest.CreatedAtUtc
+        };
     }
 
     [HttpGet("{id}")]
@@ -133,7 +216,7 @@ public class ReviewRequestsController : ControllerBase
             CreatedAtUtc = reviewRequest.CreatedAtUtc
         };
 
-       
+
     }
     [HttpGet]
     public async Task<ActionResult<PagedResultDto<ReviewRequestResponseDto>>> GetAll(
