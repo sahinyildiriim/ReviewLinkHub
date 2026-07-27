@@ -23,7 +23,7 @@ export function RequestResult({
       transition={{ duration: 0.25 }}
       className="w-full"
     >
-      <Card className="flex w-full flex-col items-center gap-6 p-8 text-center">
+      <Card className="flex w-full flex-col items-center gap-6 p-6 text-center sm:p-8">
         <div className="flex flex-col items-center gap-2">
           <CheckCircle2 className="h-10 w-10 text-primary" />
           <h2 className="text-xl font-semibold">Talep oluşturuldu</h2>

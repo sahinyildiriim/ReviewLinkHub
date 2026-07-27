@@ -8,9 +8,9 @@ export const statusLabels: Record<ReviewRequestStatus, string> = {
 
 export const statusBadgeVariant: Record<
   ReviewRequestStatus,
-  'secondary' | 'default' | 'destructive'
+  'warning' | 'success' | 'destructive'
 > = {
-  Pending: 'secondary',
-  Sent: 'default',
+  Pending: 'warning',
+  Sent: 'success',
   Failed: 'destructive',
 }

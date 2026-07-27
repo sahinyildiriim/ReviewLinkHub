@@ -27,9 +27,11 @@ export function WhyUs() {
       {items.map(({ icon: Icon, title, description }) => (
         <div
           key={title}
-          className="flex flex-col gap-2 rounded-lg border border-border p-5"
+          className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
         >
-          <Icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+          <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+            <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+          </span>
           <h3 className="font-medium">{title}</h3>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>

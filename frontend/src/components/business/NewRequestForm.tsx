@@ -94,9 +94,13 @@ export function NewRequestForm({
             }}
             placeholder="ornek@sirket.com"
             required
+            aria-invalid={emailError ? true : undefined}
+            aria-describedby={emailError ? 'recipientEmail-error' : undefined}
           />
           {emailError && (
-            <p className="text-sm text-destructive">{emailError}</p>
+            <p id="recipientEmail-error" role="alert" className="text-sm text-destructive">
+              {emailError}
+            </p>
           )}
         </div>
 
